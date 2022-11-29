@@ -1,0 +1,10 @@
+{
+    "Documents": [".doc",".docx",".odt",".xlr",".xls",".xlsx"],
+    "Logs": [".log"],
+    "Texts": [".txt"],
+    "Videos": [".3gp",".asf",".avi",".flv",".m4v",".mov",".mp4",".mpg",".wmv"],
+    "Images": [".bmp",".dcm",".dds",".djvu",".gif",".jpg",".jpeg",".heic",".ico",".png",".tiff",".tif"],
+    "Audio": [".aif",".flac",".m3u",".m4a",".mp3",".ogg",".wav",".wma"],
+    "Execuatbles": [".apk",".app",".bat",".bin",".cmd",".com",".exe",".ipa",".jar",".run",".sh"],
+    "Archives": [".7z",".cbr",".deb",".gz","pak",".pkg",".par",".rpm",".tar",".tar.gz",".tar.bz2",".tar.xz",".xapk",".zip",".zipx"]
+}
