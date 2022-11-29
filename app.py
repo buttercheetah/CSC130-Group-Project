@@ -1,8 +1,18 @@
 import os  # * we will definitely need this for moving/getting the files
 from os.path import join, getsize, splitext
 import json # * Needed to get sort criteria from file
+import argparse # * required for command line args
+
+parser = argparse.ArgumentParser(description='Sorts all files in a directory')
+parser.add_argument('--verbose', '-v', action='count', default=0, help='Enable verbose output')
+parser.add_argument('--dir', dest='DirToSort', type=str,  help='The directory you would like to sort')
+parser.add_argument('--dest', dest='DestDir', type=str,  help='The directory you would like to sort the files to')
+parser.add_argument('--quiet', '-q', action='count', default=0, help='Prevents script from asking for user input. This wil set destination and source to current directory if not otherwise set.')
+
+args = parser.parse_args()
 
 def get_file_info(file, directory):
+    if file in ['app.py', 'sortguide.json']: return None
     return {
         "name": file,
         "size": getsize(join(directory, file)),
@@ -42,10 +52,11 @@ def sort_files(files,dir_dest):
     f.close()  # close the json file
     for directory in files:
         for item in files[directory]:
-            typ = get_file_types(sortdict, item["ext"])
-            if typ:
-                item['destination_path'] = f"{dir_dest}/{typ}"
-                item['move_required'] = True
+            if item is not None: # Make sure file was not ignored
+                typ = get_file_types(sortdict, item["ext"])
+                if typ:
+                    item['destination_path'] = f"{dir_dest}/{typ}"
+                    item['move_required'] = True
 
     return files
 
@@ -53,10 +64,11 @@ def sort_files(files,dir_dest):
 def move_files(files):
     for item in files.items():
         for file in item[1]:
-            if file['move_required'] and file['destination_path'] != '':
-                if not os.path.isdir(file['destination_path']):  # If dest does not exist, create it
-                    os.makedirs(file['destination_path'])
-                os.rename(file['original_path'], f"{file['destination_path']}/{file['name']}")
+            if file is not None:  # Make sure file was not ignored
+                if file['move_required'] and file['destination_path'] != '':
+                    if not os.path.isdir(file['destination_path']):  # If dest does not exist, create it
+                        os.makedirs(file['destination_path'])
+                    os.rename(file['original_path'], f"{file['destination_path']}/{file['name']}")
 
 
 def get_dir():  # gets the directory to sort
@@ -99,9 +111,16 @@ def main():
 
     # * Noah Liby
     dir_to_sort = False
+    dir_dest = False
+    if args.quiet > 0: 
+        dir_to_sort=os.getcwd()
+        dir_dest=os.getcwd()
+    if args.DirToSort: dir_to_sort=args.DirToSort
+    if args.DestDir: dir_dest=args.DestDir
+    
+
     while not dir_to_sort:  # While dir_to_sort is not defined, continue calling the get_dir function.
         dir_to_sort = get_dir()
-    dir_dest = False
     while not dir_dest:  # While dir_to_sort is not defined, continue calling the get_dir function.
         dir_dest = get_dest_dir()
     files_to_sort = get_files(dir_to_sort)  # Get the files in the given directory
