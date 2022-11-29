@@ -2,6 +2,15 @@ import os  # * we will definitely need this for moving/getting the files
 from os.path import join, getsize, splitext
 import json # * Needed to get sort criteria from file
 
+
+parser = argparse.ArgumentParser(description='Sorts all files in a directory')
+parser.add_argument('--verbose', '-v', action='count', default=0, help='Enable verbose output')
+parser.add_argument('--dir', dest='DirToSort', type=str,  help='The directory you would like to sort')
+parser.add_argument('--dest', dest='DestDir', type=str,  help='The directory you would like to sort the files to')
+parser.add_argument('--quiet', '-q', action='count', default=0, help='Prevents script from asking for user input. This wil set destination and source to current directory if not otherwise set.')
+
+args = parser.parse_args()
+
 def get_file_info(file, directory):
     return {
         "name": file,
@@ -96,6 +105,8 @@ def main():
     # Just example
     #files = get_files('/Users/alex/Downloads')
     #move_files(sort_files(files))
+
+
 
     # * Noah Liby
     dir_to_sort = False
