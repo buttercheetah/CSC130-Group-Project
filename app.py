@@ -3,6 +3,7 @@ from os.path import join, getsize, splitext
 import json # * Needed to get sort criteria from file
 import argparse # * required for command line args
 import logging
+import shutil # For moving between drives/devices
 
 # create a logger log with name 'question8_log'
 log = logging.getLogger('Main')
@@ -26,7 +27,7 @@ parser.add_argument('--quiet', '-q', action='count', default=0, help='Prevents s
 args = parser.parse_args()
 
 def get_file_info(file, directory):
-    if file in ['app.py', 'sortguide.json']: return None
+    if file in ['app.py', 'sortguide.json', 'log.log']: return None
     return {
         "name": file,
         "size": getsize(join(directory, file)),
@@ -93,7 +94,7 @@ def move_files(files):
                     if not os.path.isdir(file['destination_path']):  # If dest does not exist, create it
                         os.makedirs(file['destination_path'])
                     log.info(f"Moving {file['original_path']} > {file['destination_path']}/{file['name']}")
-                    os.rename(file['original_path'], f"{file['destination_path']}/{file['name']}")
+                    shutil.move(file['original_path'], f"{file['destination_path']}/{file['name']}")
     tflush()
 
 
