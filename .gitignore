@@ -76,3 +76,5 @@ fabric.properties
 # directories for testing the sorting system
 examplesort
 sorted
+*.log
+*.zip

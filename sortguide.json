@@ -1,5 +1,8 @@
 {
-    "Documents": [".doc",".docx",".odt",".xlr",".xls",".xlsx"],
+    "Documents": [".doc",".docx",".odt"],
+    "PowerPoints": [".ppt",".pptx"],
+    "Spreadsheets": [".xlr",".xls",".xlsx"],
+    "PDF": [".pdf"],
     "Logs": [".log"],
     "Texts": [".txt"],
     "Videos": [".3gp",".asf",".avi",".flv",".m4v",".mov",".mp4",".mpg",".wmv"],

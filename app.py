@@ -2,6 +2,20 @@ import os  # * we will definitely need this for moving/getting the files
 from os.path import join, getsize, splitext
 import json # * Needed to get sort criteria from file
 import argparse # * required for command line args
+import logging
+
+# create a logger log with name 'question8_log'
+log = logging.getLogger('Main')
+# create file handler which logs even ERROR messages or higher
+log.setLevel(logging.INFO)
+fh = logging.FileHandler('log.log')
+fh.setLevel(logging.INFO)
+# create formatter and add it to the file handler
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+# add the file handler to the (root) logger
+log.addHandler(fh)
+
 
 parser = argparse.ArgumentParser(description='Sorts all files in a directory')
 parser.add_argument('--dir', dest='DirToSort', type=str,  help='The directory you would like to sort')
@@ -22,6 +36,12 @@ def get_file_info(file, directory):
         "move_required": False,
     }
 
+def tprint(string): #temp print
+    size = os.get_terminal_size()
+    print(f'{string}{" "*(size.columns-len(string))}', end='\r', flush=True)
+def tflush():
+    size = os.get_terminal_size()
+    print(f'{" "*(size.columns)}', end='\r', flush=True)
 
 def get_files(directory,recursive=False):
     # * Get a complete list of files in a given directory. For now, ignore directorys
@@ -67,11 +87,14 @@ def sort_files(files,dir_dest):
 def move_files(files):
     for item in files.items():
         for file in item[1]:
+            tprint(f"Processing {file['name']}")
             if file is not None:  # Make sure file was not ignored
                 if file['move_required'] and file['destination_path'] != '':
                     if not os.path.isdir(file['destination_path']):  # If dest does not exist, create it
                         os.makedirs(file['destination_path'])
+                    log.info(f"Moving {file['original_path']} > {file['destination_path']}/{file['name']}")
                     os.rename(file['original_path'], f"{file['destination_path']}/{file['name']}")
+    tflush()
 
 
 def get_dir():  # gets the directory to sort
