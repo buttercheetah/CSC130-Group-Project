@@ -4,10 +4,10 @@ import json # * Needed to get sort criteria from file
 import argparse # * required for command line args
 
 parser = argparse.ArgumentParser(description='Sorts all files in a directory')
-parser.add_argument('--verbose', '-v', action='count', default=0, help='Enable verbose output')
 parser.add_argument('--dir', dest='DirToSort', type=str,  help='The directory you would like to sort')
 parser.add_argument('--dest', dest='DestDir', type=str,  help='The directory you would like to sort the files to')
-parser.add_argument('--quiet', '-q', action='count', default=0, help='Prevents script from asking for user input. This wil set destination and source to current directory if not otherwise set.')
+parser.add_argument('--recursive', action='count', default=0,  help='If the script should go into subfolders recursively')
+parser.add_argument('--quiet', '-q', action='count', default=0, help='Prevents script from asking for user input. This wil set destination and source to current directory if not otherwise set and automatically sets recursive to true.')
 
 args = parser.parse_args()
 
@@ -23,13 +23,16 @@ def get_file_info(file, directory):
     }
 
 
-def get_files(directory):
+def get_files(directory,recursive=False):
     # * Get a complete list of files in a given directory. For now, ignore directorys
     files_dict = {}
-
-    for root, dirs, files in os.walk(directory):
-        files_dict[root] = [get_file_info(item, root) for item in files]
-
+    if recursive:
+        for root, dirs, files in os.walk(directory):
+            files_dict[root] = [get_file_info(item, root) for item in files]
+    else:
+        files = [f for f in os.listdir(directory) if os.path.isfile(f"{directory}/{f}")]
+        for tfile in files:
+            files_dict[tfile] = [get_file_info(tfile, directory)]
     return files_dict
 
 def get_file_types(sortdict, ext):  # ex. if ext is ".txt" it return Texts as defined in json file
@@ -73,10 +76,10 @@ def move_files(files):
 
 def get_dir():  # gets the directory to sort
     print("Would you like to sort your current directory? [Y/n]")
-    choice = input().lower()
+    choice = input(": ").lower()
     if choice == 'n':
         print("Please enter a directory to sort")
-        dir_to_sort = input()
+        dir_to_sort = input(": ")
     else:
         dir_to_sort = os.getcwd()
     if not os.path.isdir(dir_to_sort):  # Validate that given directory exists
@@ -86,22 +89,29 @@ def get_dir():  # gets the directory to sort
 
 def get_dest_dir():  # Gets a destination directory for the sorted files to go
     print("Would you like the sorted items to be put in your current directory? [Y/n]")
-    choice = input().lower()
+    choice = input(": ").lower()
     if choice == 'n':
         print("Please enter a destination directory")
-        dir_dest = input()
+        dir_dest = input(": ")
     else:
         dir_dest = os.getcwd()
     if not os.path.isdir(dir_dest):  # Validate that given directory exists
         print("Directory does not exist")
         print("Would you like to create the directory? [Y/n]")
-        choice = input().lower()
+        choice = input(": ").lower()
         if choice == 'n':
             return False
         else: # Create the directory
             os.makedirs(dir_dest)  # Create the directory
     return dir_dest
-
+def get_recursive():
+    print("Would you like the directory to be searched recursively [y/N]")
+    choice = input(": ").lower()
+    if choice == 'y':
+        recursive = True
+    else:
+        recursive = False
+    return recursive
 
 def main():
     # ! Whoever feels like it
@@ -112,9 +122,12 @@ def main():
     # * Noah Liby
     dir_to_sort = False
     dir_dest = False
+    recursive=""
     if args.quiet > 0: 
         dir_to_sort=os.getcwd()
         dir_dest=os.getcwd()
+        recursive=False
+    if args.recursive > 0: recursive = True
     if args.DirToSort: dir_to_sort=args.DirToSort
     if args.DestDir: dir_dest=args.DestDir
     
@@ -123,10 +136,13 @@ def main():
         dir_to_sort = get_dir()
     while not dir_dest:  # While dir_to_sort is not defined, continue calling the get_dir function.
         dir_dest = get_dest_dir()
-    files_to_sort = get_files(dir_to_sort)  # Get the files in the given directory
+    while type(recursive) != bool:
+        recursive = get_recursive()
+    files_to_sort = get_files(dir_to_sort,recursive)  # Get the files in the given directory
     sorted_files = sort_files(files_to_sort,dir_dest)  # Sort the list of files
     move_files(sorted_files)  # Move the files
     print("Done")
+    if recursive: print("Please note, this script does not remove folders after sorting.")
 
 
 if __name__ == '__main__':  # If script is being run and not imported.
